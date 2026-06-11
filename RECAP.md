@@ -4,8 +4,10 @@ Living doc. Update as spikes close or plan shifts.
 Last updated: 2026-06-11.
 
 Companion docs in this dir:
+- `buil-368-gap-matrix.md` — backoffice + widget Mollie gap analysis
 - `buil-369-gap-matrix.md` — partner onboarding
 - `buil-371-gap-matrix.md` — POS terminals
+- `buil-373-gap-matrix.md` — recurring payments + token migration
 
 Memory pointers (in `~/.claude/.../memory/adyen_migration/`):
 - `jira_epic.md` — canonical epic + spike list

@@ -9,6 +9,7 @@ Companion docs in this dir:
 - `buil-370-gap-matrix.md` — commission collection via Balance Transfers
 - `buil-371-gap-matrix.md` — POS terminals
 - `buil-373-gap-matrix.md` — recurring payments + token migration
+- `buil-374-gap-matrix.md` — payment method coverage + per-partner control parity
 
 Memory pointers (in `~/.claude/.../memory/adyen_migration/`):
 - `jira_epic.md` — canonical epic + spike list
@@ -29,14 +30,14 @@ Memory pointers (in `~/.claude/.../memory/adyen_migration/`):
 | BUIL-371 | ✅ done | Add Mollie POS alongside Adyen NEXO. Middleware grows parallel client; frontend contract unchanged. ~3–5 weeks. 3 open Qs (US/Saudi POS deployments? abort path? webhook parity?). |
 | BUIL-372 | ⬜ not started | — |
 | BUIL-373 | ✅ done | Recurring stack PSP-agnostic. SEPA members: migrate via Mollie Mandates API (IBAN, no re-entry) if Adyen export includes IBAN. Card members: re-entry required (Mollie has no card-token import). ~2–3 weeks code. Confluence 832110593. |
-| BUIL-374 | ⬜ not started | — |
+| BUIL-374 | ✅ done | Coverage in good shape — Mollie checkout already built (methods/cards/iDEAL/giftcard/PayPal/Apple Pay). All 3 Mollie-facing Qs answered from docs: ANCV not supported; Klarna capture = Captures API (no Orders API); gift cards = NL/BE Intersolve brands. Gaps are code/data: Klarna capture impl, handling-fee rows, Apple Pay domain reg, no Mollie method blocklist. Launch-blockers conditional on partner mix. Zero open Mollie questions. |
 | BUIL-375 | ⬜ not started | — |
 | BUIL-376 | ⬜ not started | — |
 | BUIL-377 | ⬜ not started | — |
 | **(new) DATA-MIGRATION** | ⬜ not started | Schema delta on `MerchantCompany` + payment tables for existing Adyen partners. Backfill plan, Adyen-field deprecation. Split out of BUIL-377. |
 | **(new) DUAL-STACK-FLAG** | ⬜ not started | One canonical PSP-selector switch across cart, refunds, webhooks, splits, recurring, POS. Cross-cutting, doesn't belong inside any single spike. |
 
-Budget: ~37 spike-days total per epic. ~22 consumed (368 + 369 + 370 + 371 + 373). ~15 left + 2 new spikes TBD.
+Budget: ~37 spike-days total per epic. ~24 consumed (368 + 369 + 370 + 371 + 373 + 374). ~13 left + 2 new spikes TBD.
 
 ---
 
@@ -74,12 +75,13 @@ Over-indexes on "does Mollie do X like Adyen". Flip to "starting from Mollie's m
 - Klarna disputes lose by default on ABP tier — confirmed pain.
 - Token migration strategy (2026-06-11): SEPA members → Mollie Mandates API with IBAN, no re-entry (pending Adyen IBAN export confirmation). Card members → re-entry on next renewal; no import path exists in Mollie. Code impact stays small — Moneta abstracts the token; Ouroboros unchanged.
 - Adyen token export process is documented and feasible: requires DPA, receiving party PCI AoC, and PGP key published on Mollie's website. Test run 1k records → full export.
+- Payment method coverage (2026-06-11, from Mollie docs): ANCV unsupported (FR ANCV partners stay on Adyen for that method); Klarna capture via Captures API on the Payments API, no Orders-API migration; gift cards = NL/BE Intersolve brands fetched via Methods API `include=issuers`. Mollie checkout (widget + backoffice) already substantially built.
 
 ---
 
 ## Next-pick options
 
-- **(a)** BUIL-374 payment method coverage — small box, unblocks per-partner toggle UX.
+- **(a)** BUIL-375 disputes/chargebacks — finance+ops, Klarna-dispute pain already known.
 - **(b)** BUIL-372 kiosk phased swap — companion to 371, mostly ops/logistics.
 - **(c)** DATA-MIGRATION or DUAL-STACK-FLAG (new spikes) — cross-cutting, foundational.
 
@@ -99,5 +101,7 @@ Over-indexes on "does Mollie do X like Adyen". Flip to "starting from Mollie's m
 - 373: Does Adyen's token export CSV include IBAN for SEPA/DD mandates (not just card fields)? → ask Adyen support
 - 373: Does Mollie publish a PGP key on their website? (Adyen requires this to send card data) → ask Mollie; if no, card vault-to-vault is dead regardless
 - 373: What % of live memberships are card-backed vs SEPA-backed? → query Moneta `RecurrentPaymentToken` + payment method breakdown internally
-- 376: Mollie coverage for ANCV (FR)
+- 374: which in-scope partners use Klarna / ANCV / non-empty `adyen_blocked_payment_methods`? → internal config + partner list
+- 374: do existing Mollie partners have `HandlingFee` rows for their methods? → DB query
+- 376: ~~Mollie coverage for ANCV (FR)~~ → ANSWERED (374): not supported; FR ANCV stays on Adyen or outside-PSP
 - 377: partner re-onboarding ownership (cannot fall on eng alone)

@@ -6,6 +6,7 @@ Last updated: 2026-06-11.
 Companion docs in this dir:
 - `buil-368-gap-matrix.md` — backoffice + widget Mollie gap analysis
 - `buil-369-gap-matrix.md` — partner onboarding
+- `buil-370-gap-matrix.md` — commission collection via Balance Transfers
 - `buil-371-gap-matrix.md` — POS terminals
 - `buil-373-gap-matrix.md` — recurring payments + token migration
 
@@ -24,7 +25,7 @@ Memory pointers (in `~/.claude/.../memory/adyen_migration/`):
 |---|---|---|
 | BUIL-368 | ✅ done | Existing Mollie code is solid. Extend, don't rewrite. 3 gaps: stored-card mgmt, settlements consumer, Klarna capture. Confluence 831291394. |
 | BUIL-369 | ✅ done | Onboarding gap matrix written. Build plan clear: Client Link API + admin button + 3 new fields + capability poller. ~3 weeks. 3 impl-blocker Qs parked below. |
-| BUIL-370 | ⬜ not started | — |
+| BUIL-370 | ✅ done | Balance Transfers API (`POST /v2/connect/balance-transfers`) confirmed. 2 new OAuth scopes needed. EUR 1k/mo default limit per sub-merchant = hard commercial pre-condition. ~1 week code after Mollie risk approvals. |
 | BUIL-371 | ✅ done | Add Mollie POS alongside Adyen NEXO. Middleware grows parallel client; frontend contract unchanged. ~3–5 weeks. 3 open Qs (US/Saudi POS deployments? abort path? webhook parity?). |
 | BUIL-372 | ⬜ not started | — |
 | BUIL-373 | ✅ done | Recurring stack PSP-agnostic. SEPA members: migrate via Mollie Mandates API (IBAN, no re-entry) if Adyen export includes IBAN. Card members: re-entry required (Mollie has no card-token import). ~2–3 weeks code. Confluence 832110593. |
@@ -35,7 +36,7 @@ Memory pointers (in `~/.claude/.../memory/adyen_migration/`):
 | **(new) DATA-MIGRATION** | ⬜ not started | Schema delta on `MerchantCompany` + payment tables for existing Adyen partners. Backfill plan, Adyen-field deprecation. Split out of BUIL-377. |
 | **(new) DUAL-STACK-FLAG** | ⬜ not started | One canonical PSP-selector switch across cart, refunds, webhooks, splits, recurring, POS. Cross-cutting, doesn't belong inside any single spike. |
 
-Budget: ~37 spike-days total per epic. ~17 consumed (368 + 369 + 371 + 373). ~20 left + 2 new spikes TBD.
+Budget: ~37 spike-days total per epic. ~22 consumed (368 + 369 + 370 + 371 + 373). ~15 left + 2 new spikes TBD.
 
 ---
 
@@ -78,12 +79,9 @@ Over-indexes on "does Mollie do X like Adyen". Flip to "starting from Mollie's m
 
 ## Next-pick options
 
-- **(a)** BUIL-370 commission collection — Phase-1 product priority, direct money impact.
-- **(b)** BUIL-374 payment method coverage — small box, unblocks per-partner toggle UX.
-- **(c)** BUIL-372 kiosk phased swap — companion to 371, mostly ops/logistics.
-- **(d)** DATA-MIGRATION or DUAL-STACK-FLAG (new spikes) — cross-cutting, foundational.
-
-Current pick: **(a) BUIL-370** — biggest product driver in the Shape Up pitch.
+- **(a)** BUIL-374 payment method coverage — small box, unblocks per-partner toggle UX.
+- **(b)** BUIL-372 kiosk phased swap — companion to 371, mostly ops/logistics.
+- **(c)** DATA-MIGRATION or DUAL-STACK-FLAG (new spikes) — cross-cutting, foundational.
 
 ---
 
